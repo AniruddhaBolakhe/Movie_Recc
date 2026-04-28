@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import pickle
 import numpy as np
+import os
+import gdown
 
 app = FastAPI()
 
@@ -12,6 +14,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+if not os.path.exists("final_model.pkl"):
+    print("Downloading model from Google Drive...")
+    gdown.download(id="1KoJ1vW-GZdEzly5nAI_9MiY5LaSKyP3y", output="final_model.pkl", quiet=False)
+    print("Download complete!")
 
 data = pickle.load(open("final_model.pkl", "rb"))
 ratings          = data['ratings']
