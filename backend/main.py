@@ -1,79 +1,84 @@
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import pickle
-import pandas as pd
+import numpy as np
+import os
+import gdown
 
-# Initialize FastAPI app
 app = FastAPI()
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # allow all (for development)
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-# -------------------------------
-# LOAD MODEL
-# -------------------------------
-model_data = pickle.load(open("model.pkl", "rb"))
 
-ratings = model_data['ratings']
-movies = model_data['movies']
-predicted_df = model_data['predicted_matrix']
-best_model = model_data['best_model']
+if not os.path.exists("final_model.pkl"):
+    print("Downloading model from Google Drive...")
+    gdown.download(id="1KoJ1vW-GZdEzly5nAI_9MiY5LaSKyP3y", output="final_model.pkl", quiet=False)
+    print("Download complete!")
 
-print("Model loaded successfully ✅")
-print("Best Model:", best_model)
+data = pickle.load(open("final_model.pkl", "rb"))
+ratings          = data['ratings']
+movies           = data['movies']
+predicted_df     = data['predicted_matrix']
+user_item_matrix = data['user_item_matrix']
+predicted_ratings = data['predicted_ratings']
+cosine_sim       = data['cosine_sim']
+best_model       = data['best_model']
 
-# -------------------------------
-# HOME ROUTE
-# -------------------------------
+
 @app.get("/")
 def home():
-    return {"message": "Movie Recommendation API is running 🚀"}
+    return {"message": "Movie Recommendation API running", "best_model": best_model.upper()}
 
-# -------------------------------
-# RECOMMENDATION FUNCTION
-# -------------------------------
-def recommend_movies(user_id, top_n=10):
-    # Check if user exists
-    if user_id not in predicted_df.index:
-        return []
 
-    # Get predicted ratings for user
-    user_preds = predicted_df.loc[user_id]
-
-    # Get already rated movies
-    rated_movies = ratings[ratings['userId'] == user_id]['movieId'].values
-
-    # Remove already watched movies
-    user_preds = user_preds.drop(labels=rated_movies, errors='ignore')
-
-    # Get top N recommendations
-    top_movies = user_preds.sort_values(ascending=False).head(top_n)
-
-    # Map movie IDs to titles
-    result = movies[movies['movieId'].isin(top_movies.index)][['movieId', 'title_clean', 'genres']].copy()
-
-    # Add predicted ratings
-    result['predicted_rating'] = result['movieId'].map(top_movies.to_dict())
-
-    # Sort results
-    result = result.sort_values(by='predicted_rating', ascending=False)
-
-    return result.to_dict(orient="records")
-
-# -------------------------------
-# API ENDPOINT
-# -------------------------------
 @app.get("/recommend/{user_id}")
-def get_recommendations(user_id: int):
-    recommendations = recommend_movies(user_id)
+def recommend(user_id: int):
+    if user_id not in predicted_df.index:
+        return {"error": f"User {user_id} not found"}
 
-    if not recommendations:
-        return {"message": "User not found or no recommendations available"}
+    preds = predicted_df.loc[user_id]
+    rated = ratings[ratings['userId'] == user_id]['movieId'].values
+    preds = preds.drop(labels=rated, errors='ignore')
+    top   = preds.sort_values(ascending=False).head(10)
 
-    return {
-        "user_id": user_id,
-        "recommendations": recommendations
-    }
+    result = movies[movies['movieId'].isin(top.index)][['movieId', 'title_clean', 'genres']].copy()
+    result['predicted_rating'] = result['movieId'].map(top.to_dict())
+    result = result.sort_values('predicted_rating', ascending=False)
+
+    return {"user_id": user_id, "model": best_model.upper(), "recommendations": result.to_dict(orient="records")}
+
+
+@app.get("/similar/{movie_name}")
+def similar(movie_name: str):
+    match = movies[movies['title_clean'].str.lower() == movie_name.lower()]
+    if match.empty:
+        match = movies[movies['title'].str.lower() == movie_name.lower()]
+    if match.empty:
+        return {"error": f"Movie '{movie_name}' not found"}
+
+    idx    = match.index[0]
+    scores = sorted(enumerate(cosine_sim[idx]), key=lambda x: x[1], reverse=True)[1:11]
+    indices = [i[0] for i in scores]
+
+    result = movies.iloc[indices][['title_clean', 'genres']].copy()
+    result['similarity_score'] = [round(s[1], 2) for s in scores]
+
+    return {"movie": movie_name, "similar_movies": result.to_dict(orient="records")}
+
+
+@app.get("/recommend/svd/{user_id}")
+def recommend_svd(user_id: int):
+    if user_id not in user_item_matrix.index:
+        return {"error": f"User {user_id} not found"}
+
+    idx      = user_item_matrix.index.get_loc(user_id)
+    top      = np.argsort(predicted_ratings[idx])[::-1][:10]
+    movie_ids = user_item_matrix.columns[top]
+
+    result = movies[movies['movieId'].isin(movie_ids)][['movieId', 'title_clean', 'genres']].copy()
+
+    return {"user_id": user_id, "model": "SVD", "recommendations": result.to_dict(orient="records")}
