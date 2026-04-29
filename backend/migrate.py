@@ -2,11 +2,14 @@ import pandas as pd
 from database import engine
 import os
 
-if not os.path.exists("movies.csv") or not os.path.exists("ratings.csv"):
-    print("Files not found.")
+MOVIES_PATH  = os.path.join("data", "movies.csv")
+RATINGS_PATH = os.path.join("data", "ratings.csv")
+
+if not os.path.exists(MOVIES_PATH) or not os.path.exists(RATINGS_PATH):
+    print("Files not found. Place movies.csv and ratings.csv inside the data/ folder.")
 else:
-    movies = pd.read_csv("movies.csv")
-    ratings = pd.read_csv("ratings.csv")
+    movies = pd.read_csv(MOVIES_PATH)
+    ratings = pd.read_csv(RATINGS_PATH)
 
     try:
         movies.to_sql('movies', con=engine, if_exists='replace', index=False)

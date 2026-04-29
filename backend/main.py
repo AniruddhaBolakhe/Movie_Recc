@@ -19,7 +19,17 @@ logger = logging.getLogger(__name__)
 # --- NEW: Global variable for the reload timer ---
 last_update_time = None
 
+if not os.path.exists("ncf_model.h5"):
+    print("Downloading NCF model from Google Drive...")
+    gdown.download(id="19yRYDEWwkR7C4W5YycCoaXJ1LeI-OaRg", output="ncf_model.h5", quiet=False)
+    print("NCF model download complete!")
+
 ncf_model = load_model("ncf_model.h5", compile=False)
+
+if not os.path.exists("user_item_encoders.pkl"):
+    print("Downloading user/item encoders from Google Drive...")
+    gdown.download(id="1V6tku8i2lltctNppO0YoQkX4YHrNOSyj", output="user_item_encoders.pkl", quiet=False)
+    print("Encoders download complete!")
 
 with open("user_item_encoders.pkl", "rb") as f:
     encoders = pickle.load(f)
