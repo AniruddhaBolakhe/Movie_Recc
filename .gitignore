@@ -6,7 +6,6 @@ backend/*.pkl
 backend/*.h5
 backend/*.csv
 backend/.env
-backend/data/
 backend/ml-latest-small/
 
 # ── Frontend ──
