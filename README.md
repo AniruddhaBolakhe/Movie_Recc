@@ -26,8 +26,8 @@ Movie_Recommendation_system/
 │   ├── database.py             # SQLAlchemy MySQL connection (reads from .env)
 │   ├── migrate.py              # Loads movies.csv and ratings.csv into MySQL
 │   ├── data/
-│   │   ├── movies.csv          # MovieLens movies data (add manually)
-│   │   └── ratings.csv         # MovieLens ratings data (add manually)
+│   │   ├── movies.csv          # MovieLens movies data (included in repo)
+│   │   └── ratings.csv         # MovieLens ratings data (included in repo)
 │   ├── .env                    # DB credentials (not committed)
 │   └── .gitignore
 ├── frontend/
@@ -82,23 +82,16 @@ DB_NAME=movie_db
 
 ---
 
-### 3. Load the MovieLens dataset
+### 3. Load the MovieLens dataset into MySQL
 
-Download the MovieLens small dataset and place the CSV files in `backend/data/`:
+The dataset is already included in the repo at `backend/data/`. Just run the migration:
 
 ```bash
 cd backend
-wget https://files.grouplens.org/datasets/movielens/ml-latest-small.zip
-unzip ml-latest-small.zip
-cp ml-latest-small/movies.csv data/
-cp ml-latest-small/ratings.csv data/
-```
-
-Run the migration to load the data into MySQL:
-
-```bash
 python migrate.py
 ```
+
+This reads `data/movies.csv` and `data/ratings.csv` and loads them into the `movie_db` database.
 
 ---
 
