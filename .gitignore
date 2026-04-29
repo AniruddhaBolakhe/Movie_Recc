@@ -26,4 +26,4 @@ frontend/yarn-error.log*
 # ── General ──
 .DS_Store
 *.log
-#
+#.venv/
