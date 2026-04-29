@@ -442,6 +442,137 @@ body {
   font-weight: 400;
 }
 
+/* ── Metrics section ── */
+.metrics-section {
+  border-top: 1px solid var(--border);
+}
+
+.metrics-body {
+  padding: 28px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.metrics-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.metrics-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.metrics-note {
+  font-size: 0.75rem;
+  color: var(--dim);
+  line-height: 1.6;
+  max-width: 620px;
+}
+
+.metrics-table {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.metric-row {
+  display: grid;
+  grid-template-columns: 260px 1fr 160px;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color 0.15s;
+}
+
+.metric-row--best {
+  border-color: var(--accent);
+  background: rgba(200, 121, 65, 0.05);
+}
+
+.metric-row__info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.metric-row__name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.metric-row__type {
+  font-size: 0.68rem;
+  color: var(--dim);
+  letter-spacing: 0.2px;
+}
+
+.metric-row__bar-wrap {
+  height: 6px;
+  background: var(--surface2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.metric-row__bar {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  opacity: 0.6;
+  transition: width 0.4s ease;
+}
+
+.metric-row--best .metric-row__bar {
+  opacity: 1;
+}
+
+.metric-row__right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.metric-row__rmse {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.metric-row__label {
+  font-size: 0.68rem;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metric-row__badge {
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 3px;
+  background: rgba(200, 121, 65, 0.15);
+  color: var(--accent);
+  border: 1px solid rgba(200, 121, 65, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.metric-row__badge--ncf {
+  background: rgba(70, 211, 105, 0.1);
+  color: var(--green);
+  border-color: rgba(70, 211, 105, 0.3);
+}
+
 /* ── Rate section ── */
 .rate-section {
   border-top: 1px solid var(--border);

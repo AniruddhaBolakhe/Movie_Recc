@@ -78,6 +78,39 @@ def home():
     return {"message": "Movie Recommendation API running", "best_model": best_model.upper()}
 
 
+@app.get("/metrics")
+def get_metrics():
+    models = [
+        {
+            "name": "KNN",
+            "full_name": "K-Nearest Neighbors",
+            "type": "Collaborative Filtering",
+            "rmse": 1.0004,
+            "best": best_model.upper() == "KNN",
+        },
+        {
+            "name": "SVD",
+            "full_name": "Singular Value Decomposition",
+            "type": "Matrix Factorization",
+            "rmse": 2.0914,
+            "best": best_model.upper() == "SVD",
+        },
+        {
+            "name": "NCF",
+            "full_name": "Neural Collaborative Filtering",
+            "type": "Deep Learning",
+            "rmse": 0.8757,
+            "best": False,
+        },
+    ]
+    return {
+        "models": models,
+        "best_collaborative_model": best_model.upper(),
+        "metric": "RMSE",
+        "note": "Lower RMSE means more accurate predictions. RMSE measures the average error in predicted star ratings on a scale of 0.5 to 5.0.",
+    }
+
+
 @app.get("/recommend/{user_id}")
 def recommend(user_id: int):
     # --- NEW: Check if we need to refresh data from the stream ---

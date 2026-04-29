@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./App.css";
 
@@ -84,6 +84,11 @@ export default function App() {
   const [error, setError]         = useState("");
   const [loading, setLoading]     = useState(false);
   const [genreFilter, setGenreFilter] = useState("");
+  const [metrics, setMetrics]     = useState(null);
+
+  useEffect(() => {
+    axios.get(`${BASE}/metrics`).then((res) => setMetrics(res.data)).catch(() => {});
+  }, []);
 
   const [ratingUserId,  setRatingUserId]  = useState("");
   const [ratingMovieId, setRatingMovieId] = useState("");
@@ -306,6 +311,48 @@ export default function App() {
         </section>
 
       </div>
+
+      {/* ── Model Performance ── */}
+      {metrics && (
+        <section className="metrics-section">
+          <TitleBar name="model.performance.js" />
+          <div className="metrics-body">
+            <div className="metrics-header">
+              <p className="metrics-title">Model Accuracy Comparison</p>
+              <p className="metrics-note">{metrics.note}</p>
+            </div>
+            <div className="metrics-table">
+              {metrics.models
+                .slice()
+                .sort((a, b) => a.rmse - b.rmse)
+                .map((m) => {
+                  const maxRmse = Math.max(...metrics.models.map((x) => x.rmse));
+                  const barWidth = ((m.rmse / maxRmse) * 100).toFixed(1);
+                  return (
+                    <div key={m.name} className={`metric-row ${m.best ? "metric-row--best" : ""}`}>
+                      <div className="metric-row__info">
+                        <span className="metric-row__name">{m.name}</span>
+                        <span className="metric-row__type">{m.full_name} &mdash; {m.type}</span>
+                      </div>
+                      <div className="metric-row__bar-wrap">
+                        <div
+                          className="metric-row__bar"
+                          style={{ width: `${barWidth}%` }}
+                        />
+                      </div>
+                      <div className="metric-row__right">
+                        <span className="metric-row__rmse">{m.rmse.toFixed(4)}</span>
+                        <span className="metric-row__label">RMSE</span>
+                        {m.best && <span className="metric-row__badge">Active</span>}
+                        {m.name === "NCF" && <span className="metric-row__badge metric-row__badge--ncf">Most Accurate</span>}
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── Rate a Movie ── */}
       <section className="rate-section">
