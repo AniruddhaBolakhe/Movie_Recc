@@ -11,6 +11,8 @@ const MODES = [
     algo: "KNN / SVD",
     comment:
       "Looks at other users who have similar viewing habits to you and recommends movies they enjoyed. Automatically picks the most accurate model.",
+    processing: "Scanning all users to find who shares your rating patterns, filtering out movies you have already seen, and ranking the best picks using the most accurate model (KNN or SVD).",
+    basis: "Recommended based on what similar users rated highly.",
   },
   {
     id: "similar",
@@ -18,6 +20,8 @@ const MODES = [
     algo: "TF-IDF + Cosine",
     comment:
       "Enter a movie you like and we will find other movies with similar genres. No account or history needed — works purely on movie content.",
+    processing: "Converting movie genres into a TF-IDF vector, then computing cosine similarity between the searched movie and every other movie in the dataset to find the closest genre matches.",
+    basis: "Recommended because they share similar genres with your searched movie.",
   },
   {
     id: "svd",
@@ -25,6 +29,8 @@ const MODES = [
     algo: "Matrix Factorization",
     comment:
       "Analyses the entire database of ratings to uncover hidden patterns and predict which movies you would enjoy but have not seen yet.",
+    processing: "Decomposing the full user-movie ratings matrix into hidden factors using Singular Value Decomposition, then reconstructing your predicted ratings for every unseen movie and picking the top 10.",
+    basis: "Recommended by predicting your rating using hidden patterns across all users and movies.",
   },
   {
     id: "ncf",
@@ -32,6 +38,8 @@ const MODES = [
     algo: "Deep Learning",
     comment:
       "A trained neural network that learns subtle connections between users and movies, going deeper than traditional recommendation methods.",
+    processing: "Passing your User ID through a trained neural network that has learned complex interaction patterns between users and movies, then scoring every movie and returning the highest-predicted ones.",
+    basis: "Recommended by a deep learning model trained on 100,000+ user-movie interactions.",
   },
 ];
 
@@ -218,9 +226,12 @@ export default function App() {
 
             {/* loading */}
             {loading && (
-              <div className="loading-line">
-                <span className="loading-dot" /><span className="loading-dot" /><span className="loading-dot" />
-                <span className="loading-text">Searching for recommendations...</span>
+              <div className="loading-block">
+                <div className="loading-line">
+                  <span className="loading-dot" /><span className="loading-dot" /><span className="loading-dot" />
+                  <span className="loading-text">Working...</span>
+                </div>
+                <p className="loading-detail">{currentMode.processing}</p>
               </div>
             )}
 
@@ -251,6 +262,11 @@ export default function App() {
               </div>
             )}
 
+            {/* basis line */}
+            {!loading && results.length > 0 && (
+              <p className="basis-line">{currentMode.basis}</p>
+            )}
+
             {/* no genre match */}
             {!loading && results.length > 0 && filteredResults.length === 0 && (
               <p className="err-line">No movies match "{genreFilter}". Try a different genre.</p>
@@ -278,10 +294,7 @@ export default function App() {
                         </p>
                       )}
                       {m.similarity_score !== undefined && (
-                        <p className="card__score accent">
-                          {(m.similarity_score * 100).toFixed(0)}
-                          <span className="card__score-label">% match</span>
-                        </p>
+                        <p className="card__score-label">Matched by genre similarity</p>
                       )}
                     </div>
                   );

@@ -290,6 +290,29 @@ body {
   margin-left: 4px;
 }
 
+.loading-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.loading-detail {
+  font-size: 0.78rem;
+  color: var(--dim);
+  line-height: 1.7;
+  border-left: 2px solid var(--accent);
+  padding-left: 12px;
+  opacity: 0.8;
+}
+
+.basis-line {
+  font-size: 0.75rem;
+  color: var(--dim);
+  border-left: 2px solid var(--accent);
+  padding-left: 10px;
+  line-height: 1.6;
+}
+
 /* ── Results meta ── */
 .results-meta {
   display: flex;
